@@ -94,12 +94,33 @@ void DynamicHID_::AppendDescriptor(DynamicHIDSubDescriptor *node)
 	descriptorSize += node->length;
 }
 
-int DynamicHID_::SendReport(uint8_t id, const void* data, int len)
+int DynamicHID_::SendReport(uint8_t id, const void* data, int len, bool sendTrailingByte)
 {
-	uint8_t p[len + 1];
-	p[0] = id;
-	memcpy(&p[1], data, len);
-	return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, p, len + 1);
+	const bool sendReportIdFirst = id != 0xff; // JOYSTICK_DONT_SEND_REPORT_ID
+	const size_t bufferSize = sendReportIdFirst ? (len + 1) : len;
+
+	uint8_t p[bufferSize];
+
+	if (sendReportIdFirst)
+	{
+		p[0] = id;
+		memcpy(&p[1], data, len);
+	}
+	else
+	{
+		memcpy(&p[0], data, len);
+	}
+
+	if (sendTrailingByte)
+	{
+		return
+			USB_Send(pluggedEndpoint, p, bufferSize) +
+			USB_Send(pluggedEndpoint | TRANSFER_RELEASE, &id, 1);
+	}
+	else
+	{
+		return USB_Send(pluggedEndpoint | TRANSFER_RELEASE, p, bufferSize);
+	}
 }
 
 bool DynamicHID_::setup(USBSetup& setup)

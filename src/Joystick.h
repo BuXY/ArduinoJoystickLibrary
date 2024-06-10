@@ -42,6 +42,7 @@
 //================================================================================
 //  Joystick (Gamepad)
 
+#define JOYSTICK_DONT_SEND_REPORT_ID       0xff
 #define JOYSTICK_DEFAULT_REPORT_ID         0x03
 #define JOYSTICK_DEFAULT_BUTTON_COUNT        32
 #define JOYSTICK_DEFAULT_AXIS_MINIMUM         0
@@ -76,6 +77,8 @@ private:
 
     // Joystick Settings
     bool     _autoSendState;
+    bool     _sendAxesAs8bit;
+    bool     _addTrailingByte;
     uint8_t  _buttonCount;
     uint8_t  _buttonValuesArraySize = 0;
     uint8_t  _hatSwitchCount;
@@ -108,6 +111,7 @@ private:
     uint8_t   _hidReportSize; 
 
 protected:
+    int buildAndSet8BitValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, int32_t actualMinimum, int32_t actualMaximum, uint8_t dataLocation[]);
     int buildAndSet16BitValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, int32_t actualMinimum, int32_t actualMaximum, uint8_t dataLocation[]);
     int buildAndSetAxisValue(bool includeAxis, int32_t axisValue, int32_t axisMinimum, int32_t axisMaximum, uint8_t dataLocation[]);
     int buildAndSetSimulationValue(bool includeValue, int32_t value, int32_t valueMinimum, int32_t valueMaximum, uint8_t dataLocation[]);
@@ -128,7 +132,9 @@ public:
         bool includeThrottle = true,
         bool includeAccelerator = true,
         bool includeBrake = true,
-        bool includeSteering = true);
+        bool includeSteering = true,
+        bool sendAxesAs8bit = false,
+        bool addTrailingByte = false);
 
     void begin(bool initAutoSendState = true);
     void end();

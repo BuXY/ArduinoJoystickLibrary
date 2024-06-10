@@ -108,7 +108,7 @@ class DynamicHID_ : public PluggableUSBModule
 public:
   DynamicHID_(void);
   int begin(void);
-  int SendReport(uint8_t id, const void* data, int len);
+  int SendReport(uint8_t id, const void* data, int len, bool sendTrailingByte = false);
   void AppendDescriptor(DynamicHIDSubDescriptor* node);
 
 protected:
